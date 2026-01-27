@@ -52,7 +52,7 @@ User - {}"""
 ❗️ ʟᴀɴɢᴜᴀɢᴇ - {languages}</b>
 """
 
-    FILE_CAPTION = """<b><a href=https://t.me/+6BS1T2v0EB45NDhl>{file_name} </a></b>
+    FILE_CAPTION = """<b><a href=https://t.me/THANOS_LINKZ>{file_name} </a></b>
 
 <i>ᴘʟᴇᴀsᴇ ꜰᴏʀᴡᴀʀᴅ ᴛʜɪs ꜰɪʟᴇs ᴛᴏ ᴛʜᴇ sᴀᴠᴇᴅ ᴍᴇssᴀɢᴇ ᴀɴᴅ ᴄʟᴏsᴇ ᴛʜɪs ᴍᴇssᴀɢᴇ</i>"""
 
