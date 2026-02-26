@@ -1,5 +1,14 @@
 import logging
-from pyrogram.errors import InputUserDeactivated, UserNotParticipant, FloodWait, UserIsBlocked, PeerIdInvalid
+from pyrogram.errors import (
+    InputUserDeactivated,
+    UserNotParticipant,
+    FloodWait,
+    UserIsBlocked,
+    PeerIdInvalid,
+    ChatAdminRequired,
+    ChannelPrivate,
+    ChatForbidden,
+)
 from info import AUTH_CHANNEL, LONG_IMDB_DESCRIPTION
 from imdb import Cinemagoer
 import asyncio
@@ -36,31 +45,112 @@ class temp(object):
     GROUPS_CANCEL = False    
     CHAT = {}
 
+
 async def is_subscribed(bot, user_id, channel_id):
+    """
+    Check whether a user is a member of a channel or group.
+
+    Works correctly for:
+      - Public channels
+      - Private channels
+      - Private groups (bot must be an admin in the group)
+      - Request-to-join groups (pending requests are NOT counted here;
+        use is_req_subscribed() for that logic instead)
+
+    Returns True if the user is a non-banned member, False otherwise.
+    """
     try:
-        user = await bot.get_chat_member(channel_id, user_id)
+        member = await bot.get_chat_member(channel_id, user_id)
+        return member.status != enums.ChatMemberStatus.BANNED
     except UserNotParticipant:
-        pass
+        # User has not joined at all — expected, not an error
+        return False
+    except (PeerIdInvalid, ValueError):
+        # AUTH_CHANNEL value is wrong (e.g. username for a private group).
+        # Private groups must use their numeric ID (-100xxxxxxxxx).
+        logger.error(
+            "FSub: AUTH_CHANNEL '%s' is invalid. "
+            "Private groups and channels require their numeric ID (e.g. -1001234567890).",
+            channel_id,
+        )
+        return False
+    except ChatAdminRequired:
+        # Bot is not an admin in the group — it cannot inspect members.
+        logger.error(
+            "FSub: Bot lacks admin rights in AUTH_CHANNEL '%s'. "
+            "Make the bot an admin to enable member verification.",
+            channel_id,
+        )
+        return False
+    except (ChannelPrivate, ChatForbidden):
+        # Bot is not a member of the private channel/group at all.
+        logger.error(
+            "FSub: Bot is not a member of AUTH_CHANNEL '%s'. "
+            "Add the bot to the channel/group and promote it to admin.",
+            channel_id,
+        )
+        return False
     except Exception as e:
-        pass
-    else:
-        if user.status != enums.ChatMemberStatus.BANNED:
-            return True
-    return False
+        logger.exception("FSub: Unexpected error checking membership for user %s in %s: %s", user_id, channel_id, e)
+        return False
+
 
 async def is_req_subscribed(bot, query):
-    if await db.find_join_req(query.from_user.id):
-        return True
+    """
+    Full FSub verification that supports:
+      1. Regular channels/groups   — direct membership check via get_chat_member
+      2. Private channels/groups   — same check; bot must be admin
+      3. Request-to-join groups    — pending join requests are stored in DB and
+                                     treated as 'subscribed' so users aren't
+                                     blocked while their request awaits approval
+
+    Priority order:
+      - DB record exists  →  True  (covers request-to-join pending state)
+      - get_chat_member succeeds and status is not BANNED  →  True
+      - Anything else  →  False
+    """
+    user_id = query.from_user.id
+
+    # ── Step 1: check pending join request stored by join_req.py ────────────
+    # This covers users who clicked "Request to Join" but whose request hasn't
+    # been approved yet.  We allow them through so they aren't stuck.
     try:
-        user = await bot.get_chat_member(AUTH_CHANNEL, query.from_user.id)
-    except UserNotParticipant:
-        pass
-    except Exception as e:
-        logger.exception(e)
-    else:
-        if user.status != enums.ChatMemberStatus.BANNED:
+        if await db.find_join_req(user_id):
             return True
+    except Exception as e:
+        logger.exception("FSub: DB error while checking join request for user %s: %s", user_id, e)
+
+    # ── Step 2: direct membership check ─────────────────────────────────────
+    try:
+        member = await bot.get_chat_member(AUTH_CHANNEL, user_id)
+        if member.status != enums.ChatMemberStatus.BANNED:
+            return True
+    except UserNotParticipant:
+        # User hasn't joined — expected path, not an error
+        pass
+    except (PeerIdInvalid, ValueError):
+        logger.error(
+            "FSub: AUTH_CHANNEL '%s' is invalid for get_chat_member. "
+            "Use the numeric ID for private groups (e.g. -1001234567890).",
+            AUTH_CHANNEL,
+        )
+    except ChatAdminRequired:
+        logger.error(
+            "FSub: Bot is not admin in AUTH_CHANNEL '%s'. "
+            "Promote the bot to admin so it can verify members.",
+            AUTH_CHANNEL,
+        )
+    except (ChannelPrivate, ChatForbidden):
+        logger.error(
+            "FSub: Bot is not inside AUTH_CHANNEL '%s'. "
+            "Add the bot and promote it to admin.",
+            AUTH_CHANNEL,
+        )
+    except Exception as e:
+        logger.exception("FSub: Unexpected error in is_req_subscribed for user %s: %s", user_id, e)
+
     return False
+
  
 async def get_poster(query, bulk=False, id=False, file=None):
     if not id:
@@ -306,3 +396,4 @@ def get_readable_time(seconds):
             period_value, seconds = divmod(seconds, period_seconds)
             result += f'{int(period_value)}{period_name}'
     return result
+         
