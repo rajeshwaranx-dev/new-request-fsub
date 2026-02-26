@@ -58,6 +58,7 @@ LANGUAGES = ["hindi", "english", "telugu", "tamil", "kannada", "malayalam"]
 
 auth_channel = environ.get('AUTH_CHANNEL', '-1003710846054')
 AUTH_CHANNEL = int(auth_channel) if auth_channel and id_pattern.search(auth_channel) else None
+FSUB_LINK = os.environ.get("FSUB_LINK", "https://t.me/+-NYeMLd5LQYxMjQ1") 
 SUPPORT_GROUP = int(environ.get('SUPPORT_GROUP', '-1002844979596'))
 
 # bot settings
