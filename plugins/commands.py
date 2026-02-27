@@ -497,22 +497,13 @@ async def all_settings(client, message):
 ɴᴀᴍᴇ : `{settings["shortner_two"]}`
 ᴀᴘɪ : `{settings["api_two"]}`
 
-✅️ 𝟹ʀᴅ ꜱʜᴏʀᴛᴇɴᴇʀ ꜰᴏʀ ᴠᴇʀɪꜰʏ
-ɴᴀᴍᴇ : `{settings["shortner_three"]}`
-ᴀᴘɪ : `{settings["api_three"]}`
-
-🧭 𝟸ɴᴅ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ᴛɪᴍᴇ - `{settings['verify_time']}`
-
-🧭 𝟹ʀᴅ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ᴛɪᴍᴇ - `{settings['third_verify_time']}`
+🧭 ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ᴛɪᴍᴇ - `{settings['verify_time']}`
 
 1⃣ ᴛᴜᴛᴏʀɪᴀʟ ʟɪɴᴋ -
 {settings.get('tutorial', TUTORIAL)}
 
 2⃣ ᴛᴜᴛᴏʀɪᴀʟ ʟɪɴᴋ -
 {settings.get('tutorial_two', TUTORIAL2)}
-
-3⃣ ᴛᴜᴛᴏʀɪᴀʟ ʟɪɴᴋ -
-{settings.get('tutorial_three', TUTORIAL3)}
 
 📝 ʟᴏɢ ᴄʜᴀɴɴᴇʟ ɪᴅ -
 `{settings['log']}`
