@@ -5,7 +5,7 @@ import math
 import logging
 from pyrogram.errors.exceptions.bad_request_400 import MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty
 from Script import script
-from info import MAX_BTN, BIN_CHANNEL, USERNAME, URL, IS_VERIFY, LANGUAGES, AUTH_CHANNEL, SUPPORT_GROUP, QR_CODE, DELETE_TIME, PM_SEARCH, ADMINS
+from info import MAX_BTN, BIN_CHANNEL, USERNAME, URL, IS_VERIFY, LANGUAGES, AUTH_CHANNEL, SUPPORT_GROUP, QR_CODE, DELETE_TIME, PM_SEARCH, ADMINS, FSUB_LINK
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, WebAppInfo 
 from pyrogram import Client, filters, enums
 from pyrogram.errors import MessageNotModified
@@ -25,7 +25,33 @@ CAP = {}
 @Client.on_message(filters.private & filters.text & filters.incoming)
 async def pm_search(client, message):
     if PM_SEARCH:
-        await auto_filter(client, message)  
+        # ── FSub check for PM search ─────────────────────────────────────
+        if AUTH_CHANNEL:
+            is_subbed = await db.find_join_req(message.from_user.id) or await is_req_subscribed(client, message)
+            if not is_subbed:
+                join_url = None
+                settings = await db.get_settings(0)
+                join_url = settings.get('fsub_link', '') or FSUB_LINK
+                if not join_url:
+                    try:
+                        generated = await client.create_chat_invite_link(AUTH_CHANNEL)
+                        join_url = generated.invite_link
+                    except Exception:
+                        try:
+                            chat_info = await client.get_chat(AUTH_CHANNEL)
+                            if chat_info.username:
+                                join_url = f"https://t.me/{chat_info.username}"
+                        except Exception:
+                            pass
+                btn = [[InlineKeyboardButton("⛔️ ᴊᴏɪɴ ɴᴏᴡ ⛔️", url=join_url)]] if join_url else []
+                await message.reply_text(
+                    text=script.FSUB_TXT.format(message.from_user.mention),
+                    reply_markup=InlineKeyboardMarkup(btn) if btn else None,
+                    parse_mode=enums.ParseMode.HTML
+                )
+                return
+        # ─────────────────────────────────────────────────────────────────
+        await auto_filter(client, message)
     else:
         await message.reply_text("⚠️ ꜱᴏʀʀʏ ɪ ᴄᴀɴ'ᴛ ᴡᴏʀᴋ ɪɴ ᴘᴍ")
     
