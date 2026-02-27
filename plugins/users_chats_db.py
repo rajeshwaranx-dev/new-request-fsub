@@ -1,7 +1,7 @@
 import datetime
 import pytz
 from motor.motor_asyncio import AsyncIOMotorClient
-from info import IS_VERIFY, AUTH_CHANNEL, FSUB_LINK, SHORTENER_WEBSITE3, SHORTENER_API3, THREE_VERIFY_GAP, LINK_MODE, FILE_CAPTION, TUTORIAL, TUTORIAL2, TUTORIAL3, DATABASE_NAME, DATABASE_URI, DATABASE_URI2, IMDB, IMDB_TEMPLATE, PROTECT_CONTENT, AUTO_DELETE, SPELL_CHECK, AUTO_FILTER, LOG_VR_CHANNEL, SHORTENER_WEBSITE, SHORTENER_API, SHORTENER_WEBSITE2, SHORTENER_API2, TWO_VERIFY_GAP
+from info import IS_VERIFY, AUTH_CHANNEL, SHORTENER_WEBSITE3, SHORTENER_API3, THREE_VERIFY_GAP, LINK_MODE, FILE_CAPTION, TUTORIAL, TUTORIAL2, TUTORIAL3, DATABASE_NAME, DATABASE_URI, DATABASE_URI2, IMDB, IMDB_TEMPLATE, PROTECT_CONTENT, AUTO_DELETE, SPELL_CHECK, AUTO_FILTER, LOG_VR_CHANNEL, SHORTENER_WEBSITE, SHORTENER_API, SHORTENER_WEBSITE2, SHORTENER_API2, TWO_VERIFY_GAP
 
 client = AsyncIOMotorClient(DATABASE_URI)
 mydb = client[DATABASE_NAME]
@@ -29,7 +29,6 @@ class Database:
             'shortner_three': SHORTENER_WEBSITE3,
             'api_three': SHORTENER_API3,
             'fsub_id': AUTH_CHANNEL,
-            'fsub_link': FSUB_LINK,
             'third_verify_time': THREE_VERIFY_GAP
     }
     
@@ -65,6 +64,9 @@ class Database:
 
     async def del_join_req(self):
         await self.req.drop()
+
+    async def del_join_req_user(self, user_id):
+        await self.req.delete_one({'id': user_id})
 
     def new_group(self, id, title):
         return dict(
@@ -270,4 +272,3 @@ class Database:
         )
 
 db = Database()
-      
