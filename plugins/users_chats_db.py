@@ -7,27 +7,27 @@ client = AsyncIOMotorClient(DATABASE_URI)
 mydb = client[DATABASE_NAME]
 
 class Database:
-    default = {
-            'spell_check': SPELL_CHECK,
-            'auto_filter': AUTO_FILTER,
-            'file_secure': PROTECT_CONTENT,
-            'auto_delete': AUTO_DELETE,
-            'template': IMDB_TEMPLATE,
-            'caption': FILE_CAPTION,
-            'tutorial': TUTORIAL,
-            'tutorial_two': TUTORIAL2,
-            'shortner': SHORTENER_WEBSITE,
-            'api': SHORTENER_API,
-            'shortner_two': SHORTENER_WEBSITE2,
-            'api_two': SHORTENER_API2,
-            'log': LOG_VR_CHANNEL,
-            'imdb': IMDB,
-            'link': LINK_MODE, 
-            'is_verify': IS_VERIFY, 
-            'verify_time': 43200,
-            'fsub_id': AUTH_CHANNEL,
-            'fsub_link': FSUB_LINK,
-    }
+   default = {
+        'spell_check': SPELL_CHECK,
+        'auto_filter': AUTO_FILTER,
+        'file_secure': PROTECT_CONTENT,
+        'auto_delete': AUTO_DELETE,
+        'template': IMDB_TEMPLATE,
+        'caption': FILE_CAPTION,
+        'tutorial': TUTORIAL,
+        'tutorial_two': TUTORIAL2,
+        'shortner': SHORTENER_WEBSITE,
+        'api': SHORTENER_API,
+        'shortner_two': SHORTENER_WEBSITE2,
+        'api_two': SHORTENER_API2,
+        'log': LOG_VR_CHANNEL,
+        'imdb': IMDB,
+        'link': LINK_MODE, 
+        'is_verify': IS_VERIFY, 
+        'verify_time': 43200,
+        'fsub_id': AUTH_CHANNEL,
+        'fsub_link': FSUB_LINK,
+}
     
     def __init__(self):
         self.col = mydb.users
